@@ -1,9 +1,11 @@
-<!doctype html>
-<html lang="pl">
+
+  </script>
+</b<!doctype html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Robux | Zapytanie o zamówienie</title>
+  <title>Robux | Order Request</title>
   <style>
     :root {
       color-scheme: dark;
@@ -125,26 +127,25 @@
 <body>
   <main>
     <section id="order-view">
-      <p class="eyebrow">Zapytanie o zamówienie</p>
+      <p class="eyebrow">Order Request</p>
       <h1>Robux</h1>
       <p class="intro">
-        Wybierz ilość i wyślij zapytanie. Szacowany czas oczekiwania rośnie
-        wraz z wybraną ilością.
+        Select the amount and submit your request. Estimated waiting time increases with the selected quantity.
       </p>
 
       <form id="order-form" action="https://formsubmit.co/ajax/therealrobuxgiver@gmail.com" method="POST">
-        <input type="hidden" name="_subject" value="Nowe zapytanie o Robux">
+        <input type="hidden" name="_subject" value="New Robux Request">
         <input type="hidden" name="_template" value="table">
 
-        <label for="username">Nazwa użytkownika Roblox (nie Display Name)</label>
-        <input id="username" name="Nazwa użytkownika Roblox" type="text" autocomplete="off" required maxlength="30">
+        <label for="username">Roblox Username (not Display Name)</label>
+        <input id="username" name="Roblox Username" type="text" autocomplete="off" required maxlength="30">
 
-        <label for="email">Adres e-mail do kontaktu (opcjonalnie)</label>
+        <label for="email">Contact Email Address (optional)</label>
         <input id="email" name="email" type="email" autocomplete="email">
-        <p class="hint">Podaj e-mail, jeśli chcesz otrzymać wiadomość o wysłaniu Robux.</p>
+        <p class="hint">Providing a contact email allows us to reach out and resolve any potential issues, as well as notify you when the Robux are sent.</p>
 
-        <label for="quantity">Ilość Robux</label>
-        <select id="quantity" name="Wybrana ilość Robux" required>
+        <label for="quantity">Robux Quantity</label>
+        <select id="quantity" name="Selected Robux Quantity" required>
           <option value="10">10 Robux</option>
           <option value="15">15 Robux</option>
           <option value="20">20 Robux</option>
@@ -156,35 +157,34 @@
           <option value="50">50 Robux</option>
         </select>
 
-        <label for="pass-name">Nazwa gamepassa</label>
-        <input id="pass-name" name="Nazwa gamepassa" type="text" required maxlength="60">
-        <p class="hint" id="pass-price-hint">Dla 10 Robux gamepass powinien mieć wartość 14 Robux.</p>
+        <label for="pass-name">Gamepass Name</label>
+        <input id="pass-name" name="Gamepass Name" type="text" required maxlength="60">
+        <p class="hint" id="pass-price-hint">For 10 Robux, the gamepass should be priced at 14 Robux.</p>
 
         <div class="estimate" aria-live="polite">
-          Szacowany czas oczekiwania: <strong id="wait-time">około 3 dni</strong>
+          Estimated waiting time: <strong id="wait-time">about 3 days</strong>
         </div>
 
         <p class="notice">
-          Czas jest orientacyjny. Nie podawaj hasła ani kodów logowania.
-          Wartość gamepassa jest wyliczana dla wybranej ilości.
+          The waiting time is an estimate. Never share your password or login codes. Please note that the listed gamepass prices on the site may contain errors. Providing your contact email allows us to get in touch and fix any mistakes.
         </p>
 
         <label class="consent">
-          <input id="consent" type="checkbox" name="Zgoda na wykorzystanie danych do kontaktu" value="Tak" required>
-          <span>Zgadzam się na wykorzystanie podanych danych do kontaktu i obsługi zapytania.</span>
+          <input id="consent" type="checkbox" name="Consent for data processing" value="Yes" required>
+          <span>I agree to the processing of the provided data for contact and request processing purposes.</span>
         </label>
 
-        <button id="submit-button" type="submit" disabled>Wyślij zapytanie</button>
+        <button id="submit-button" type="submit" disabled>Submit Request</button>
         <p id="form-status" class="status" role="status" aria-live="polite" hidden></p>
       </form>
     </section>
 
     <section id="success-view" hidden>
-      <p class="eyebrow">Zapytanie przyjęte</p>
-      <h1>Zamówienie wysłane</h1>
-      <p class="intro">Twoje zamówienie oczekuje na odebranie. Dziękujemy.</p>
+      <p class="eyebrow">Request Received</p>
+      <h1>Order Submitted</h1>
+      <p class="intro">Your order is pending processing. Thank you!</p>
       <div class="status" data-state="success">
-        Wysłaliśmy zapytanie do obsługi. Zamówienie oczekuje na odebranie.
+        Your request has been submitted. The order is now pending.
       </div>
     </section>
   </main>
@@ -205,8 +205,8 @@
       const days = 3 + quantitySteps + extraDays;
       const passPrice = Math.ceil(quantity * 1.4);
 
-      waitTime.textContent = `około ${days} ${days === 1 ? "dnia" : "dni"}`;
-      passPriceHint.textContent = `Dla ${quantity} Robux gamepass powinien mieć wartość ${passPrice} Robux.`;
+      waitTime.textContent = `about ${days} ${days === 1 ? "day" : "days"}`;
+      passPriceHint.textContent = `For ${quantity} Robux, the gamepass should be priced at ${passPrice} Robux.`;
       updateSubmitState();
     }
 
@@ -223,10 +223,10 @@
       if (!form.reportValidity() || !consent.checked) return;
 
       submitButton.disabled = true;
-      submitButton.textContent = "Wysyłanie...";
+      submitButton.textContent = "Sending...";
       formStatus.hidden = false;
       formStatus.dataset.state = "loading";
-      formStatus.textContent = "Wysyłamy zapytanie...";
+      formStatus.textContent = "Sending your request...";
 
       try {
         const response = await fetch(form.action, {
@@ -240,15 +240,15 @@
         const result = await response.json();
 
         if (!response.ok || result.success === false || result.success === "false") {
-          throw new Error(result.message || "Nie udało się wysłać zapytania.");
+          throw new Error(result.message || "Failed to send request.");
         }
 
         document.querySelector("#order-view").hidden = true;
         document.querySelector("#success-view").hidden = false;
       } catch (error) {
         formStatus.dataset.state = "error";
-        formStatus.textContent = "Nie udało się wysłać zapytania. Sprawdź połączenie i spróbuj ponownie.";
-        submitButton.textContent = "Spróbuj ponownie";
+        formStatus.textContent = "Failed to send request. Check your connection and try again.";
+        submitButton.textContent = "Try again";
         updateSubmitState();
       }
     });
