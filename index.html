@@ -14,6 +14,7 @@
       --lime: #c8f169;
       --orange: #ff9c67;
       --line: #344137;
+      --error: #ff8a80;
     }
 
     * { box-sizing: border-box; }
@@ -50,24 +51,9 @@
       text-transform: uppercase;
     }
 
-    h1 {
-      margin: 0;
-      font-size: clamp(2rem, 8vw, 3rem);
-      line-height: 1.05;
-    }
-
-    .intro {
-      margin: 14px 0 28px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    label {
-      display: block;
-      margin: 18px 0 8px;
-      font-size: 0.92rem;
-      font-weight: 700;
-    }
+    h1 { margin: 0; font-size: clamp(2rem, 8vw, 3rem); line-height: 1.05; }
+    .intro { margin: 14px 0 28px; color: var(--muted); line-height: 1.6; }
+    label { display: block; margin: 18px 0 8px; font-size: 0.92rem; font-weight: 700; }
 
     input, select {
       width: 100%;
@@ -80,12 +66,10 @@
       font: inherit;
     }
 
-    input:focus, select:focus {
-      outline: 2px solid var(--lime);
-      outline-offset: 2px;
-    }
+    input:focus, select:focus { outline: 2px solid var(--lime); outline-offset: 2px; }
+    .hint { margin: 7px 0 0; color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
 
-    .estimate {
+    .estimate, .status {
       margin-top: 18px;
       padding: 15px;
       border-left: 3px solid var(--orange);
@@ -94,13 +78,7 @@
     }
 
     .estimate strong { color: var(--orange); }
-
-    .notice {
-      margin: 18px 0;
-      color: var(--muted);
-      font-size: 0.84rem;
-      line-height: 1.55;
-    }
+    .notice { margin: 18px 0; color: var(--muted); font-size: 0.84rem; line-height: 1.55; }
 
     .consent {
       display: grid;
@@ -132,8 +110,12 @@
       cursor: pointer;
     }
 
-    button:hover { background: #d8ff8a; }
+    button:hover:not(:disabled) { background: #d8ff8a; }
     button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+    button:disabled { cursor: not-allowed; opacity: 0.48; }
+    .status[hidden] { display: none; }
+    .status[data-state="error"] { border-color: var(--error); }
+    .status[data-state="success"] { border-color: var(--lime); }
 
     @media (max-width: 480px) {
       main { padding: 25px 20px; }
@@ -142,82 +124,137 @@
 </head>
 <body>
   <main>
-    <p class="eyebrow">Zapytanie o zamówienie</p>
-    <h1>Robux</h1>
-    <p class="intro">
-      Wybierz ilość i wyślij zapytanie. Czas oczekiwania jest orientacyjny
-      i rośnie wraz z wybraną liczbą Robux.
-    </p>
-
-    <!-- Zmień adres poniżej na skrzynkę, która ma otrzymywać zgłoszenia. -->
-    <form action="https://formsubmit.co/TWOJ_EMAIL@gmail.com" method="POST">
-      <input type="hidden" name="_subject" value="Nowe zapytanie o Robux">
-      <input type="hidden" name="_template" value="table">
-
-      <label for="username">Nazwa użytkownika Roblox</label>
-      <input
-        id="username"
-        name="Nazwa użytkownika Roblox"
-        type="text"
-        autocomplete="off"
-        required
-        maxlength="30"
-      >
-
-      <label for="email">Twój adres e-mail do kontaktu</label>
-      <input
-        id="email"
-        name="email"
-        type="email"
-        autocomplete="email"
-        required
-      >
-
-      <label for="quantity">Ilość Robux</label>
-      <select id="quantity" name="Wybrana ilość Robux" required>
-        <option value="10">10 Robux</option>
-        <option value="15">15 Robux</option>
-        <option value="20">20 Robux</option>
-        <option value="25">25 Robux</option>
-        <option value="30">30 Robux</option>
-        <option value="35">35 Robux</option>
-        <option value="40">40 Robux</option>
-        <option value="45">45 Robux</option>
-        <option value="50">50 Robux</option>
-      </select>
-
-      <div class="estimate" aria-live="polite">
-        Szacowany czas oczekiwania:
-        <strong id="wait-time">około 1 dnia</strong>
-      </div>
-
-      <p class="notice">
-        To jest orientacyjny czas, nie gwarantowany termin. Nie podawaj hasła
-        ani kodów logowania. Realizuj zamówienia wyłącznie metodami
-        dozwolonymi przez Roblox.
+    <section id="order-view">
+      <p class="eyebrow">Zapytanie o zamówienie</p>
+      <h1>Robux</h1>
+      <p class="intro">
+        Wybierz ilość i wyślij zapytanie. Szacowany czas oczekiwania rośnie
+        wraz z wybraną ilością.
       </p>
 
-      <label class="consent">
-        <input type="checkbox" name="Zgoda na przekazanie danych" value="Tak" required>
-        <span>Zgadzam się na przekazanie podanych danych do obsługi zapytania przez formularz FormSubmit.</span>
-      </label>
+      <form id="order-form" action="https://formsubmit.co/ajax/therealrobuxgiver@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="Nowe zapytanie o Robux">
+        <input type="hidden" name="_template" value="table">
 
-      <button type="submit">Wyślij zapytanie</button>
-    </form>
+        <label for="username">Nazwa użytkownika Roblox (nie Display Name)</label>
+        <input id="username" name="Nazwa użytkownika Roblox" type="text" autocomplete="off" required maxlength="30">
+
+        <label for="email">Adres e-mail do kontaktu (opcjonalnie)</label>
+        <input id="email" name="email" type="email" autocomplete="email">
+        <p class="hint">Podaj e-mail, jeśli chcesz otrzymać wiadomość o wysłaniu Robux.</p>
+
+        <label for="quantity">Ilość Robux</label>
+        <select id="quantity" name="Wybrana ilość Robux" required>
+          <option value="10">10 Robux</option>
+          <option value="15">15 Robux</option>
+          <option value="20">20 Robux</option>
+          <option value="25">25 Robux</option>
+          <option value="30">30 Robux</option>
+          <option value="35">35 Robux</option>
+          <option value="40">40 Robux</option>
+          <option value="45">45 Robux</option>
+          <option value="50">50 Robux</option>
+        </select>
+
+        <label for="pass-name">Nazwa gamepassa</label>
+        <input id="pass-name" name="Nazwa gamepassa" type="text" required maxlength="60">
+        <p class="hint" id="pass-price-hint">Dla 10 Robux gamepass powinien mieć wartość 14 Robux.</p>
+
+        <div class="estimate" aria-live="polite">
+          Szacowany czas oczekiwania: <strong id="wait-time">około 3 dni</strong>
+        </div>
+
+        <p class="notice">
+          Czas jest orientacyjny. Nie podawaj hasła ani kodów logowania.
+          Wartość gamepassa jest wyliczana dla wybranej ilości.
+        </p>
+
+        <label class="consent">
+          <input id="consent" type="checkbox" name="Zgoda na wykorzystanie danych do kontaktu" value="Tak" required>
+          <span>Zgadzam się na wykorzystanie podanych danych do kontaktu i obsługi zapytania.</span>
+        </label>
+
+        <button id="submit-button" type="submit" disabled>Wyślij zapytanie</button>
+        <p id="form-status" class="status" role="status" aria-live="polite" hidden></p>
+      </form>
+    </section>
+
+    <section id="success-view" hidden>
+      <p class="eyebrow">Zapytanie przyjęte</p>
+      <h1>Zamówienie wysłane</h1>
+      <p class="intro">Twoje zamówienie oczekuje na odebranie. Dziękujemy.</p>
+      <div class="status" data-state="success">
+        Wysłaliśmy zapytanie do obsługi. Zamówienie oczekuje na odebranie.
+      </div>
+    </section>
   </main>
 
   <script>
+    const form = document.querySelector("#order-form");
     const quantitySelect = document.querySelector("#quantity");
     const waitTime = document.querySelector("#wait-time");
+    const passPriceHint = document.querySelector("#pass-price-hint");
+    const submitButton = document.querySelector("#submit-button");
+    const consent = document.querySelector("#consent");
+    const formStatus = document.querySelector("#form-status");
 
-    function updateWaitTime() {
+    function updateOrderDetails() {
       const quantity = Number(quantitySelect.value);
-      const days = Math.ceil(quantity / 10);
+      const quantitySteps = (quantity - 10) / 5;
+      const extraDays = quantity >= 45 ? 5 : quantity > 30 ? 3 : 0;
+      const days = 3 + quantitySteps + extraDays;
+      const passPrice = Math.ceil(quantity * 1.4);
+
       waitTime.textContent = `około ${days} ${days === 1 ? "dnia" : "dni"}`;
+      passPriceHint.textContent = `Dla ${quantity} Robux gamepass powinien mieć wartość ${passPrice} Robux.`;
+      updateSubmitState();
     }
 
-    quantitySelect.addEventListener("change", updateWaitTime);
-    updateWaitTime();
+    function updateSubmitState() {
+      submitButton.disabled = !form.checkValidity() || !consent.checked;
+    }
+
+    quantitySelect.addEventListener("change", updateOrderDetails);
+    form.addEventListener("input", updateSubmitState);
+    form.addEventListener("change", updateSubmitState);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!form.reportValidity() || !consent.checked) return;
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Wysyłanie...";
+      formStatus.hidden = false;
+      formStatus.dataset.state = "loading";
+      formStatus.textContent = "Wysyłamy zapytanie...";
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(Object.fromEntries(new FormData(form).entries()))
+        });
+        const result = await response.json();
+
+        if (!response.ok || result.success === false || result.success === "false") {
+          throw new Error(result.message || "Nie udało się wysłać zapytania.");
+        }
+
+        document.querySelector("#order-view").hidden = true;
+        document.querySelector("#success-view").hidden = false;
+      } catch (error) {
+        formStatus.dataset.state = "error";
+        formStatus.textContent = "Nie udało się wysłać zapytania. Sprawdź połączenie i spróbuj ponownie.";
+        submitButton.textContent = "Spróbuj ponownie";
+        updateSubmitState();
+      }
+    });
+
+    updateOrderDetails();
+    updateSubmitState();
   </script>
 </body>
 </html>
